@@ -20,7 +20,8 @@
 #include <omp.h>
 
 namespace {
-struct cplx {
+struct cplx
+{
     double re;
     double im;
 };
@@ -56,29 +57,41 @@ long count_tile_upper(int i0, int j0, int j_half)
     }
     return local;
 }
-}  // namespace
+} // namespace
 
 long mandelbrot_tasks()
 {
     long outside = 0;
     constexpr int J_HALF = NPOINTS / 2;
+    constexpr int I_TILES = (NPOINTS + TILE - 1) / TILE;
+    constexpr int J_TILES = (J_HALF + TILE - 1) / TILE;
+    constexpr int TILE_COUNT = I_TILES * J_TILES;
+    auto* tile_counts = new long[TILE_COUNT]();
 
-    #pragma omp parallel
+#pragma omp parallel
     {
-        #pragma omp single
+#pragma omp single
         {
-            for (int i0 = 0; i0 < NPOINTS; i0 += TILE) {
-                for (int j0 = 0; j0 < J_HALF; j0 += TILE) {
-                    #pragma omp task firstprivate(i0, j0) shared(outside)
-                    {
-                        const long local = 2 * count_tile_upper(i0, j0, J_HALF);
-                        #pragma omp atomic update
-                        outside += local;
+#pragma omp taskgroup
+            {
+                for (int it = 0; it < I_TILES; ++it) {
+                    for (int jt = 0; jt < J_TILES; ++jt) {
+                        const int tile_index = (it * J_TILES) + jt;
+#pragma omp task firstprivate(it, jt, tile_index) shared(tile_counts)
+                        {
+                            tile_counts[tile_index] =
+                                2 * count_tile_upper(it * TILE, jt * TILE, J_HALF);
+                        }
                     }
                 }
             }
         }
     }
+
+    for (int tile_index = 0; tile_index < TILE_COUNT; ++tile_index) {
+        outside += tile_counts[tile_index];
+    }
+    delete[] tile_counts;
 
     if constexpr (NPOINTS % 2 == 1) {
         const int j = J_HALF;
@@ -96,8 +109,8 @@ long mandelbrot_tasks()
 int main()
 {
     const long outside = mandelbrot_tasks();
-    const double area = 9.0 * static_cast<double>(outside)
-                        / (static_cast<double>(NPOINTS) * NPOINTS);
+    const double area =
+        9.0 * static_cast<double>(outside) / (static_cast<double>(NPOINTS) * NPOINTS);
     // Deterministic output — correctness channel only. Timing via hyperfine.
     std::printf("outside = %ld\n", outside);
     std::printf("area = %.6f\n", area);

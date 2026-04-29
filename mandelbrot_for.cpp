@@ -14,7 +14,8 @@
 #include <omp.h>
 
 namespace {
-struct cplx {
+struct cplx
+{
     double re;
     double im;
 };
@@ -32,16 +33,16 @@ inline int escape_iters(double cr, double ci)
     }
     return MAXITER;
 }
-}  // namespace
+} // namespace
 
 long mandelbrot_parallel_for()
 {
     long outside = 0;
-    constexpr int J_HALF = NPOINTS / 2;     // upper half by symmetry
+    constexpr int J_HALF = NPOINTS / 2; // upper half by symmetry
 
-    // Collapse the upper-half grid and use a reduction on the mirrored escape
-    // count. Dynamic scheduling helps with the highly irregular boundary cost.
-    #pragma omp parallel for collapse(2) schedule(dynamic, 32) reduction(+:outside)
+// Collapse the upper-half grid and use a reduction on the mirrored escape
+// count. Dynamic scheduling helps with the highly irregular boundary cost.
+#pragma omp parallel for collapse(2) schedule(dynamic, 32) reduction(+ : outside)
     for (int i = 0; i < NPOINTS; ++i) {
         for (int j = 0; j < J_HALF; ++j) {
             const double cr = -2.0 + (3.0 * static_cast<double>(i) / NPOINTS);
@@ -68,8 +69,8 @@ long mandelbrot_parallel_for()
 int main()
 {
     const long outside = mandelbrot_parallel_for();
-    const double area = 9.0 * static_cast<double>(outside)
-                        / (static_cast<double>(NPOINTS) * NPOINTS);
+    const double area =
+        9.0 * static_cast<double>(outside) / (static_cast<double>(NPOINTS) * NPOINTS);
     // Deterministic output — correctness channel only. Timing via hyperfine.
     std::printf("outside = %ld\n", outside);
     std::printf("area = %.6f\n", area);
