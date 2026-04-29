@@ -39,13 +39,9 @@ long mandelbrot_parallel_for()
     long outside = 0;
     constexpr int J_HALF = NPOINTS / 2;     // upper half by symmetry
 
-    // TODO(student): parallelise the outer-or-collapsed loop. Reduction on
-    // `outside`. Pick a schedule. Serial fallback below so the scaffolding
-    // builds on day 2.
-    //
-    // The loop body counts each grid point in the upper half (j ∈ [0, J_HALF))
-    // and adds 2 to `outside` for each escape (mirror in the lower half via
-    // Mandelbrot symmetry mandel(c) = mandel(c̄)).
+    // Collapse the upper-half grid and use a reduction on the mirrored escape
+    // count. Dynamic scheduling helps with the highly irregular boundary cost.
+    #pragma omp parallel for collapse(2) schedule(dynamic, 32) reduction(+:outside)
     for (int i = 0; i < NPOINTS; ++i) {
         for (int j = 0; j < J_HALF; ++j) {
             const double cr = -2.0 + (3.0 * static_cast<double>(i) / NPOINTS);

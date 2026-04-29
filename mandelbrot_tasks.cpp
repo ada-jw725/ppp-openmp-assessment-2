@@ -62,17 +62,24 @@ long mandelbrot_tasks()
 {
     long outside = 0;
     constexpr int J_HALF = NPOINTS / 2;
-    // TODO(student): replace this serial fallback with a task-parallel version.
-    //
-    // Iterate over upper-half tile origins (i0 ∈ [0, NPOINTS), j0 ∈ [0, J_HALF))
-    // at stride TILE, spawn one task per tile, accumulate per-tile counts. Add
-    // 2 × count to `outside` for each tile (mirror in the lower half via
-    // Mandelbrot symmetry).
-    for (int i0 = 0; i0 < NPOINTS; i0 += TILE) {
-        for (int j0 = 0; j0 < J_HALF; j0 += TILE) {
-            outside += 2 * count_tile_upper(i0, j0, J_HALF);
+
+    #pragma omp parallel
+    {
+        #pragma omp single
+        {
+            for (int i0 = 0; i0 < NPOINTS; i0 += TILE) {
+                for (int j0 = 0; j0 < J_HALF; j0 += TILE) {
+                    #pragma omp task firstprivate(i0, j0) shared(outside)
+                    {
+                        const long local = 2 * count_tile_upper(i0, j0, J_HALF);
+                        #pragma omp atomic update
+                        outside += local;
+                    }
+                }
+            }
         }
     }
+
     if constexpr (NPOINTS % 2 == 1) {
         const int j = J_HALF;
         for (int i = 0; i < NPOINTS; ++i) {
