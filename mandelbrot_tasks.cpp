@@ -66,32 +66,19 @@ long mandelbrot_tasks()
     constexpr int I_TILES = (NPOINTS + TILE - 1) / TILE;
     constexpr int J_TILES = (J_HALF + TILE - 1) / TILE;
     constexpr int TILE_COUNT = I_TILES * J_TILES;
-    auto* tile_counts = new long[TILE_COUNT]();
 
 #pragma omp parallel
     {
 #pragma omp single
         {
-#pragma omp taskgroup
-            {
-                for (int it = 0; it < I_TILES; ++it) {
-                    for (int jt = 0; jt < J_TILES; ++jt) {
-                        const int tile_index = (it * J_TILES) + jt;
-#pragma omp task firstprivate(it, jt, tile_index) shared(tile_counts)
-                        {
-                            tile_counts[tile_index] =
-                                2 * count_tile_upper(it * TILE, jt * TILE, J_HALF);
-                        }
-                    }
-                }
+#pragma omp taskloop grainsize(1) reduction(+ : outside)
+            for (int tile_index = 0; tile_index < TILE_COUNT; ++tile_index) {
+                const int it = tile_index / J_TILES;
+                const int jt = tile_index % J_TILES;
+                outside += 2 * count_tile_upper(it * TILE, jt * TILE, J_HALF);
             }
         }
     }
-
-    for (int tile_index = 0; tile_index < TILE_COUNT; ++tile_index) {
-        outside += tile_counts[tile_index];
-    }
-    delete[] tile_counts;
 
     if constexpr (NPOINTS % 2 == 1) {
         const int j = J_HALF;
