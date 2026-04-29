@@ -1,7 +1,7 @@
 ---
 recommended: parallel_for
-measured_tasks_s: 0.08018808174
-measured_for_s: 0.0755657109
+measured_tasks_s: 0.0801927947
+measured_for_s: 0.07733670674000001
 ---
 
 <!--
@@ -37,6 +37,6 @@ for the perf-component score against the published `T_ref` times.)
 
 Explain your recommendation in plain English. This text is not auto-scored, but it's what the instructor reads when spot-checking and what you get credit for via the REFLECTION-prompt route.
 
-I recommend `parallel_for` for this submission because it was the fastest variant in my own CX3 measurements at the higher thread counts that matter most for the final comparison. At 128 threads, `parallel_for` ran in 0.0756 s, while `tasks` took 0.0802 s. The same pattern also appeared at 64 threads, where `parallel_for` was again faster.
+I recommend `parallel_for` for this submission because it was faster at every genuinely parallel thread count in my own CX3 measurements. Only the 1-thread run showed a small advantage for `tasks`, which I do not consider the most important evidence for a parallel OpenMP comparison. At 128 threads, `parallel_for` ran in 0.0773 s, while `tasks` took 0.0802 s. It was also faster at 16 and 64 threads.
 
-My interpretation is that this Mandelbrot region is irregular enough that dynamic scheduling helps, but not irregular enough for explicit task creation to repay its extra runtime overhead. In my implementation, `parallel_for` already uses dynamic scheduling and reduction, so it gets useful load balancing with less scheduling and synchronisation cost than the task-based version. Tasks were competitive at low and medium thread counts, but the simpler worksharing variant delivered the best measured high-thread performance on my benchmark runs.
+My interpretation is that dynamic loop scheduling already captures enough load balancing for this Mandelbrot region, while the tasks variant still pays extra overhead for task creation, runtime scheduling, and tile-level bookkeeping. That overhead is especially visible in my 16-thread result, where the tasks version did not scale well at all. So although the workload is irregular, it is not irregular enough for explicit task parallelism to beat a dynamically scheduled `parallel_for` on this implementation.
