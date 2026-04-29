@@ -1,0 +1,9 @@
+{"results": [
+  {"thread_count": 1, "variant": "parallel_for", "time_s": 6.5231894640000005},
+  {"thread_count": 16, "variant": "parallel_for", "time_s": 0.42219871830000005},
+  {"thread_count": 64, "variant": "parallel_for", "time_s": 0.11889009286000002},
+  {"thread_count": 128, "variant": "parallel_for", "time_s": 0.0755657109},
+  {"thread_count": 1, "variant": "tasks", "time_s": 6.40641409142},
+  {"thread_count": 16, "variant": "tasks", "time_s": 0.42177111498000003},
+  {"thread_count": 64, "variant": "tasks", "time_s": 0.13188846482000002},
+  {"thread_count": 128, "variant": "tasks", "time_s": 0.08018808174}]}
