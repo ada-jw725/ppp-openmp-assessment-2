@@ -1,9 +1,9 @@
 {"results": [
-  {"thread_count": 1, "variant": "parallel_for", "time_s": 6.5231894640000005},
-  {"thread_count": 16, "variant": "parallel_for", "time_s": 0.42219871830000005},
-  {"thread_count": 64, "variant": "parallel_for", "time_s": 0.11889009286000002},
-  {"thread_count": 128, "variant": "parallel_for", "time_s": 0.0755657109},
-  {"thread_count": 1, "variant": "tasks", "time_s": 6.40641409142},
-  {"thread_count": 16, "variant": "tasks", "time_s": 0.42177111498000003},
-  {"thread_count": 64, "variant": "tasks", "time_s": 0.13188846482000002},
-  {"thread_count": 128, "variant": "tasks", "time_s": 0.08018808174}]}
+  {"thread_count": 1, "variant": "parallel_for", "time_s": 6.540070110579999},
+  {"thread_count": 16, "variant": "parallel_for", "time_s": 0.41736205512},
+  {"thread_count": 64, "variant": "parallel_for", "time_s": 0.11968029246},
+  {"thread_count": 128, "variant": "parallel_for", "time_s": 0.07583172805999999},
+  {"thread_count": 1, "variant": "tasks", "time_s": 6.46041815598},
+  {"thread_count": 16, "variant": "tasks", "time_s": 0.42468332750000004},
+  {"thread_count": 64, "variant": "tasks", "time_s": 0.1328171578},
+  {"thread_count": 128, "variant": "tasks", "time_s": 0.07941977178}]}
